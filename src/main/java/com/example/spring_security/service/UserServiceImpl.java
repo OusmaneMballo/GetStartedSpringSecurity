@@ -6,19 +6,45 @@ import com.example.spring_security.repository.RoleRepository;
 import com.example.spring_security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserApp userApp = userRepository.findByUsername(username);
+        if (userApp==null){
+            log.error("User not found in the database");
+            throw new UsernameNotFoundException("User note found");
+        }
+        else {
+            log.info("User found in the database {}", username);
+        }
+
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        userApp.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        });
+        return new org.springframework.security.core.userdetails.User(userApp.getUsername(), userApp.getPassword(), authorities);
+    }
+
     @Override
     public UserApp saveUser(UserApp user) {
         log.info("Saving new user {} to the database", user.getUsername());
@@ -52,4 +78,5 @@ public class UserServiceImpl implements UserService{
         log.info("Getting all users");
         return userRepository.findAll();
     }
+
 }
