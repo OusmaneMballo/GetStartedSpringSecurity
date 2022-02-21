@@ -1,5 +1,6 @@
 package com.example.spring_security.security;
 
+import com.example.spring_security.filter.ConstomAuthorizationFilter;
 import com.example.spring_security.filter.ConstumAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -33,12 +35,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         constumAuthenticationFilter.setFilterProcessesUrl("/api/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().antMatchers("/api/login/**").permitAll();
+        http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh/**").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/api/user/**").hasAnyAuthority("ROLE_ADMIN");
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/users/**").hasAnyAuthority("ROLE_USER");
-        //http.authorizeRequests().anyRequest().authenticated();
-        //http.authorizeRequests().anyRequest().permitAll();
         http.addFilter(constumAuthenticationFilter);
+        http.addFilterBefore(new ConstomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
