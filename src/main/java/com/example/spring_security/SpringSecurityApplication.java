@@ -28,7 +28,7 @@ public class SpringSecurityApplication {
 
     @Bean
     CommandLineRunner run(UserService userService){
-          return args -> {
+          return null; /*args -> {
               userService.saveRole(new Role(null, "ROLE_USER"));
               userService.saveRole(new Role(null, "ROLE_MANAGER"));
               userService.saveRole(new Role(null, "ROLE_ADMIN"));
@@ -46,6 +46,6 @@ public class SpringSecurityApplication {
               userService.addRoleToUser("john", "ROLE_ADMIN");
               userService.addRoleToUser("will", "ROLE_USER");
               userService.addRoleToUser("arnold", "ROLE_USER");
-          };
+          };*/
     }
 }
